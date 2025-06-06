@@ -1,6 +1,7 @@
 let pageUrls = {
     about: '/index.html?about',
-    contact:'/index.html?contact'
+    contact:'/index.html?contact',
+    gallery: '/index.html?gallery'
     };
     function OnStartUp() {
     popStateHandler();
@@ -47,5 +48,45 @@ let pageUrls = {
     let loc = window.location.href.toString().split(window.location.host)[1];
     if (loc === pageUrls.contact){ RenderContactPage(); }
     if(loc === pageUrls.about){ RenderAboutPage(); }
+    if (loc === pageUrls.gallery) { RenderGalleryPage(); }
     }
+    document.querySelector('#gallery-link').addEventListener('click', (event) => {
+    let stateObj = { page: 'gallery' };
+    document.title = 'Gallery';
+    history.pushState(stateObj, "gallery", "?gallery");
+    RenderGalleryPage();
+});
+function RenderGalleryPage() {
+    document.querySelector('main').innerHTML = `
+        <h1 class="title">Gallery</h1>
+        <div id="gallery" class="gallery-grid"></div>
+
+        <div id="modal" class="modal hidden">
+            <span id="modal-close">&times;</span>
+            <img id="modal-img" src="" alt="Preview">
+        </div>
+    `;
+
+    loadImages();
+    setupModalHandlers();
+}
+function loadImages() {
+    const gallery = document.getElementById('gallery');
+    for (let i = 1; i <= 9; i++) {
+        fetch(`images/${i}.jpg`)
+            .then(res => res.blob())
+            .then(blob => {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(blob);
+                img.classList.add('thumb');
+                img.loading = 'lazy'; // lazy loading
+                img.setAttribute('data-index', i); // numer obrazka
+                gallery.appendChild(img);
+            })
+            .catch(err => console.error(`Błąd ładowania obrazu ${i}.jpg:`, err));
+    }
+}
+
+
+
     window.onpopstate = popStateHandler;
